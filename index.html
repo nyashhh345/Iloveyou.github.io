@@ -1,84 +1,90 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Flappy Kitty Game</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background-image: url("https://i.pinimg.com/736x/6b/54/b4/6b54b4d20be07ad860df0cf8c55a11ff.jpg");
-      background-size: cover;
-      background-position: center;
-      font-family: 'Allura', cursive;
-      text-align: center;
-      overflow: hidden;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Slope Game - I love you <3</title>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    background-image: url("https://i.pinimg.com/736x/6b/54/b4/6b54b4d20be07ad860df0cf8c55a11ff.jpg");
+    background-size: cover;
+    background-position: center;
+    font-family: 'Allura', cursive;
+    text-align: center;
+    overflow: hidden;
+  }
 
-    canvas {
-      display: block;
-      margin: 50px auto;
-      background-color: rgba(255,182,193,0.2); /* soft pink overlay */
-      border-radius: 15px;
-    }
+  #game-container {
+    margin-top: 50px;
+  }
 
-    #score {
-      font-size: 2rem;
-      color: #ff1493;
-      text-shadow: 1px 1px 2px #00000050;
-    }
+  canvas {
+    display: block;
+    margin: 0 auto;
+    background-color: rgba(255,182,193,0.2); 
+    border-radius: 15px;
+  }
 
-    #kitten {
-      display: none;
-      width: 150px;
-      margin-top: 20px;
-      border-radius: 15px;
-      box-shadow: 3px 3px 10px #00000080;
-    }
+  #score {
+    font-size: 2rem;
+    color: #ff1493;
+    text-shadow: 1px 1px 2px #00000050;
+  }
 
-    #restart-btn {
-      background-color: lightpink; 
-      color: white; 
-      padding: 10px 20px; 
-      font-size: 1.2rem; 
-      border-radius: 15px; 
-      margin-top: 20px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
+  #kitten {
+    display: none;
+    width: 200px;
+    margin-top: 20px;
+    border-radius: 15px;
+    box-shadow: 3px 3px 10px #00000080;
+  }
 
-    #restart-btn:hover {
-      background-color: #ff69b4;
-      transform: scale(1.05);
-    }
+  #restart-btn {
+    background-color: lightpink; 
+    color: white; 
+    padding: 10px 20px; 
+    font-size: 1.2rem; 
+    border-radius: 15px; 
+    margin-top: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
 
-    .download-btn {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      display: inline-block;
-      background-color: lightpink;
-      color: white;
-      padding: 12px 25px;
-      border-radius: 25px;
-      font-size: 1.2rem;
-      text-decoration: none;
-      transition: all 0.3s ease;
-    }
+  #restart-btn:hover {
+    background-color: #ff69b4;
+    transform: scale(1.05);
+  }
 
-    .download-btn:hover {
-      background-color: #ff69b4;
-      transform: scale(1.05);
-    }
-  </style>
+  .download-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: inline-block;
+    background-color: lightpink;
+    color: white;
+    padding: 12px 25px;
+    border-radius: 25px;
+    font-size: 1.2rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+
+  .download-btn:hover {
+    background-color: #ff69b4;
+    transform: scale(1.05);
+  }
+</style>
 </head>
 <body>
 
-<h1>Flappy Kitty!</h1>
+<h1>Welcome my fellow kitten.</h1>
 <div id="score">Score: 0</div>
-<canvas id="gameCanvas" width="400" height="500"></canvas>
-<button id="restart-btn">Start Over!</button>
+<div id="game-container">
+  <canvas id="gameCanvas" width="400" height="500"></canvas>
+  <button id="restart-btn">Start Over!</button>
+</div>
 <img id="kitten" src="https://i.pinimg.com/736x/1f/fe/6e/1ffe6e69f3e9ef76e5f5efc5a7f3918c.jpg" alt="Cute Pink Kitten">
 <a href="your-link-here" class="download-btn">Next page</a>
 
@@ -86,26 +92,123 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-const player = { x: 50, y: 250, width: 40, height: 40, color: 'pink', dy: 0 };
-const gravity = 0.6;
-const jumpPower = -10;
-const pipes = [];
-const pipeWidth = 50;
-const gap = 150;
-let frame = 0;
+const player = { x: 180, y: 400, width: 40, height: 40, color: 'pink', dx: 0 };
+const obstacles = [];
+const obstacleWidth = 60;
+const obstacleHeight = 20;
+let speed = 2;
 let score = 0;
 let gameOver = false;
-const scoreGoal = 20; // Score to unlock kitten
+const scoreGoal = 50; 
 const kitten = document.getElementById('kitten');
 const restartBtn = document.getElementById('restart-btn');
 
-// Handle jump
-function jump() {
-  if(!gameOver) player.dy = jumpPower;
-}
-document.addEventListener('keydown', jump);
-canvas.addEventListener('touchstart', jump); // mobile tap
 
-// Generate pipes
-function generatePipe() {
-  con
+function generateObstacle() {
+  const x = Math.random() * (canvas.width - obstacleWidth);
+  obstacles.push({ x: x, y: -obstacleHeight });
+}
+
+
+function drawPlayer() {
+  ctx.fillStyle = player.color;
+  ctx.fillRect(player.x, player.y, player.width, player.height);
+}
+
+
+function drawObstacles() {
+  ctx.fillStyle = '#ff69b4'; 
+  obstacles.forEach(obs => {
+    ctx.fillRect(obs.x, obs.y, obstacleWidth, obstacleHeight);
+    obs.y += speed;
+  });
+}
+
+
+function checkCollision() {
+  for (let obs of obstacles) {
+    if (player.x < obs.x + obstacleWidth &&
+        player.x + player.width > obs.x &&
+        player.y < obs.y + obstacleHeight &&
+        player.y + player.height > obs.y) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function updateScore() {
+  score++;
+  document.getElementById('score').textContent = `Score: ${score}`;
+  if(score >= scoreGoal) {
+    kitten.style.display = 'block';
+  }
+}
+
+
+function gameLoop() {
+  if(gameOver) return;
+
+
+  player.x += player.dx;
+  if(player.x < 0) player.x = 0;
+  if(player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawPlayer();
+  drawObstacles();
+
+  if(Math.random() < 0.02) generateObstacle();
+
+  if(checkCollision()) {
+    gameOver = true;
+    document.getElementById('score').textContent = `Game Over! Score: ${score}`;
+    return;
+  }
+
+  updateScore();
+  requestAnimationFrame(gameLoop);
+}
+
+
+document.addEventListener('keydown', (e) => {
+  const step = 5; 
+  if(e.key === 'ArrowLeft') player.dx = -step;
+  if(e.key === 'ArrowRight') player.dx = step;
+});
+
+document.addEventListener('keyup', (e) => {
+  if(e.key === 'ArrowLeft' || e.key === 'ArrowRight') player.dx = 0;
+});
+
+
+canvas.addEventListener('touchstart', (e) => {
+  const touchX = e.touches[0].clientX;
+  const moveAmount = 40;
+  if(touchX < window.innerWidth / 2 && player.x > 0) player.x -= moveAmount;
+  else if(touchX >= window.innerWidth / 2 && player.x + player.width < canvas.width) player.x += moveAmount;
+});
+
+gameLoop();
+
+restartBtn.addEventListener('click', () => {
+  player.x = 180;
+  player.y = 400;
+  player.dx = 0;
+
+ 
+  obstacles.length = 0;
+
+  score = 0;
+  document.getElementById('score').textContent = `Score: ${score}`;
+
+  kitten.style.display = 'none';
+
+  gameOver = false;
+
+  gameLoop();
+});
+</script>
+
+</body>
+</html>
