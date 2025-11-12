@@ -3,10 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>I love you <3 - Clicker Game</title>
+  <title>Slope Game - I love you <3</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Allura&display=swap');
-
     body {
       margin: 0;
       padding: 0;
@@ -17,51 +15,26 @@
       font-family: 'Allura', cursive;
       color: black;
       text-align: center;
-      overflow-x: hidden;
+      overflow: hidden;
     }
 
-    h1 {
-      margin-top: 30px;
-      font-size: 3rem;
-      color: pink;
-      text-shadow: 1px 1px 2px #000;
+    canvas {
+      display: block;
+      margin: 50px auto;
+      background-color: rgba(255,182,193,0.2); /* soft pink overlay */
+      border-radius: 15px;
     }
 
-    #game-container {
-      margin-top: 50px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    #clicker-btn {
-      background-color: lightpink;
-      color: white;
-      padding: 20px 40px;
-      font-size: 1.5rem;
-      border: none;
-      border-radius: 25px;
-      cursor: pointer;
-      box-shadow: 2px 2px 6px #00000050;
-      transition: all 0.2s ease;
-    }
-
-    #clicker-btn:hover {
-      background-color: #ff69b4;
-      transform: scale(1.05);
-    }
-
-    #counter {
-      margin-top: 20px;
+    #score {
       font-size: 2rem;
       color: #ff1493;
       text-shadow: 1px 1px 2px #00000050;
     }
 
     #kitten {
-      margin-top: 30px;
       display: none;
       width: 200px;
+      margin-top: 20px;
       border-radius: 15px;
       box-shadow: 3px 3px 10px #00000080;
     }
@@ -76,8 +49,8 @@
       padding: 12px 25px;
       border-radius: 25px;
       font-size: 1.2rem;
-      transition: all 0.3s ease;
       text-decoration: none;
+      transition: all 0.3s ease;
     }
 
     .download-btn:hover {
@@ -88,37 +61,91 @@
 </head>
 <body>
 
-  <h1>Welcome my fellow kitten.</h1>
+<h1>Welcome my fellow kitten.</h1>
+<div id="score">Score: 0</div>
+<canvas id="gameCanvas" width="400" height="500"></canvas>
+<img id="kitten" src="https://i.pinimg.com/736x/1f/fe/6e/1ffe6e69f3e9ef76e5f5efc5a7f3918c.jpg" alt="Cute Pink Kitten">
+<a href="your-link-here" class="download-btn">Next page</a>
 
-  <div id="game-container">
-    <button id="clicker-btn">Click me!</button>
-    <div id="counter">Hearts: 0 / 20</div>
-    <img id="kitten" src="https://i.pinimg.com/736x/1f/fe/6e/1ffe6e69f3e9ef76e5f5efc5a7f3918c.jpg" alt="Cute Pink Kitten">
-  </div>
+<script>
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
 
-  <a href="your-link-here" class="download-btn">Next page</a>
+  const player = { x: 180, y: 400, width: 40, height: 40, color: 'pink' };
+  const obstacles = [];
+  const obstacleWidth = 60;
+  const obstacleHeight = 20;
+  let speed = 2;
+  let score = 0;
+  let gameOver = false;
+  const scoreGoal = 50; // reach 50 points to unlock kitten
 
-  <script>
-    let count = 0;
-    const goal = 20; // number of clicks to win kitten
-    const counter = document.getElementById('counter');
-    const kitten = document.getElementById('kitten');
-    const clickerBtn = document.getElementById('clicker-btn');
+  // Generate random obstacles
+  function generateObstacle() {
+    const x = Math.random() * (canvas.width - obstacleWidth);
+    obstacles.push({ x: x, y: -obstacleHeight });
+  }
 
-    clickerBtn.addEventListener('click', () => {
-      if (count < goal) {
-        count++;
-        counter.textContent = `Hearts: ${count} / ${goal}`;
-      }
-      if (count === goal) {
-        kitten.style.display = 'block';
-        counter.textContent = `You unlocked your cute pink kitten! 😻`;
-        clickerBtn.disabled = true;
-        clickerBtn.style.opacity = 0.5;
-        clickerBtn.style.cursor = 'default';
-      }
+  function drawPlayer() {
+    ctx.fillStyle = player.color;
+    ctx.fillRect(player.x, player.y, player.width, player.height);
+  }
+
+  function drawObstacles() {
+    ctx.fillStyle = '#ff69b4'; // hot pink
+    obstacles.forEach(obs => {
+      ctx.fillRect(obs.x, obs.y, obstacleWidth, obstacleHeight);
+      obs.y += speed;
     });
-  </script>
+  }
+
+  function checkCollision() {
+    for (let obs of obstacles) {
+      if (player.x < obs.x + obstacleWidth &&
+          player.x + player.width > obs.x &&
+          player.y < obs.y + obstacleHeight &&
+          player.y + player.height > obs.y) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function updateScore() {
+    score++;
+    document.getElementById('score').textContent = `Score: ${score}`;
+    if(score >= scoreGoal) {
+      document.getElementById('kitten').style.display = 'block';
+    }
+  }
+
+  function gameLoop() {
+    if(gameOver) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawPlayer();
+    drawObstacles();
+
+    if(Math.random() < 0.02) generateObstacle();
+
+    if(checkCollision()) {
+      gameOver = true;
+      document.getElementById('score').textContent = `Game Over! Score: ${score}`;
+      return;
+    }
+
+    updateScore();
+    requestAnimationFrame(gameLoop);
+  }
+
+  document.addEventListener('keydown', (e) => {
+    const step = 20;
+    if(e.key === 'ArrowLeft' && player.x > 0) player.x -= step;
+    if(e.key === 'ArrowRight' && player.x + player.width < canvas.width) player.x += step;
+  });
+
+  gameLoop();
+</script>
 
 </body>
 </html>
