@@ -17,7 +17,15 @@
       text-align: center;
       overflow: hidden;
     }
-
+<button id="restart-btn" style="
+  background-color: lightpink; 
+  color: white; 
+  padding: 10px 20px; 
+  font-size: 1.2rem; 
+  border-radius: 15px; 
+  margin-top: 20px;
+  cursor: pointer;
+">Start Over!</button>
     canvas {
       display: block;
       margin: 50px auto;
@@ -61,13 +69,27 @@
 </head>
 <body>
 
-<h1>Welcome my fellow kitten.</h1>
+<h1>Get to score 20 to win!</h1>
 <div id="score">Score: 0</div>
 <canvas id="gameCanvas" width="400" height="500"></canvas>
 <img id="kitten" src="https://i.pinimg.com/736x/1f/fe/6e/1ffe6e69f3e9ef76e5f5efc5a7f3918c.jpg" alt="Cute Pink Kitten">
 <a href="your-link-here" class="download-btn">Next page</a>
 
 <script>
+  const restartBtn = document.getElementById('restart-btn');
+
+restartBtn.addEventListener('click', () => {
+  player.x = 180;
+  player.y = 400;
+
+  obstacles.length = 0;
+
+  score = 0;
+  document.getElementById('score').textContent = `Score: ${score}`;
+  document.getElementById('kitten').style.display = 'none';
+  gameOver = false;
+ gameLoop();
+});
   const canvas = document.getElementById('gameCanvas');
   const ctx = canvas.getContext('2d');
 
@@ -78,7 +100,7 @@
   let speed = 2;
   let score = 0;
   let gameOver = false;
-  const scoreGoal = 50; // reach 50 points to unlock kitten
+  const scoreGoal = 20; // reach 50 points to unlock kitten
 
   // Generate random obstacles
   function generateObstacle() {
